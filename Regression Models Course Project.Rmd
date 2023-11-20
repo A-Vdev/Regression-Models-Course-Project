@@ -1,0 +1,120 @@
+---
+title: "Regression-Models-Project"
+author: "Abhijeet"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Synopsis
+The following analysis is done on the "mtcars" data in the R dataset package and addresses the following questions:
+
+1. “Is an automatic or manual transmission better for MPG”
+
+2. "Quantify the MPG difference between automatic and manual transmissions" 
+- Description: The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+## Data Processing
+```{r}
+#libraries
+library(datasets);library(ggplot2);require(stats); require(graphics)
+data(mtcars)
+```
+## Exploratory Data Analysis
+```{r}
+?mtcars
+summary(mtcars)
+```
+The data frame contains 32 observations on 11 (numeric) variables.
+
+1. mpg	Miles/(US) gallon
+2. cyl	Number of cylinders
+3. disp	Displacement (cu.in.)
+4. hp	Gross horsepower
+5. drat	Rear axle ratio
+6. wt	Weight (1000 lbs)
+7. qsec	1/4 mile time
+8. vs	Engine (0 = V-shaped, 1 = straight)
+9. am	Transmission (0 = automatic, 1 = manual)
+10. gear	Number of forward gears
+11. carb	Number of carburetors
+```{r}
+boxplot(mtcars$mpg~mtcars$am,main="mtcars data",xlab="mpg(Miles/(US) gallon)",ylab="am(Transmission)")
+```
+Checking Normality
+```{r}
+shapiro.test(mtcars$mpg)
+```
+- The P-value of the Shapiro-Wilk normality test must be greater than 0.05 for assuming normality. Hence, the mpg(Miles/(US) gallon
+) data is normally distributed. 
+```{r}
+t.test(mtcars$mpg~mtcars$am, paired = FALSE, var.equal = FALSE)
+```
+- From the above test it is ensured that null Hypothesis(p-value < Significance level) can be rejected at 5% significance level. The mpg(miles per gallon) is higher for manual transmission and there is a significant difference between the auto and manual transmission.
+
+## Regression model
+
+### logistic regression
+
+First, lets check the dependency of miles per gallon(mpg) and transmission(am), particularly looking to answer the following  question:
+
+“Is an automatic or manual transmission better for MPG?"
+
+In this test the outcome is binary or categorical variable 0 and 1.Thus use logistic regression.
+```{r}
+fit<-glm(am~mpg,data=mtcars, family ="binomial")
+summary(fit)
+exp(fit$coefficients)
+```
+AIC which similar to R² tells the significance of test but opposite of R² the lesser the value of AIC better fit to the data. In this test the AIC is 33.675.There is a 36% probability of a transmission to be manual for every additional mile per gallon. To improve AIC, trying multivariate regression.
+
+### multivariate regression
+The best fit model suggested that the transmission, weight and 1/4 mile time/ performance measure of acceleration are the best fir variables.
+```{r}
+fit_1<-lm(formula = mpg ~ wt + qsec + am, data = mtcars)
+summary(fit_1)$coef
+summary(fit_1)$r.squared
+```
+## Conclusion
+In logistic regression it can observed that there is a 36% probability of a transmission to be manual for every additional mile per gallon. While it is difficult to interpret in multivariate regression because at significance level alpha=0.05, miles per gallon and transmission are significantly influenced by other factors( weight and acceleration).
+
+
+
+
+
+_________________________________________________________________
+
+## Appendix
+
+### Appendix A -Data Visualization
+```{r}
+library(GGally)
+options(repr.plot.width = 30, repr.plot.height = 30)
+ggpairs(mtcars,  title = "Scatter and correlation matrix",upper = list(continuous = wrap("cor",size = 3)), 
+    lower = list(continuous = wrap("smooth")))
+```
+Normality visualization
+```{r}
+qqnorm(mtcars$mpg)
+qqline(mtcars$mpg,col=2)
+```
+
+### Appendix B - Model Selection
+```{r}
+step(lm(mpg~.,data=mtcars),direction = "both",trace=0)
+```
+### Appendix C logistic regression Plots
+Plot of residuals for my multivariate regression.
+
+```{r}
+par(mfrow = c(2, 2))
+plot(fit)
+```
+
+### Appendix D Multivariate Regression
+```{r}
+par(mfrow = c(2, 2))
+plot(fit_1)
+```
