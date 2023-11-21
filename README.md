@@ -1,5 +1,5 @@
 # Regression-Models-Course-Project
-### Abhijeet Verma
+### Abhijeet
 ## Summary: 
 In this project, the regression analysis is done on the "mtcars" data in the R dataset package and addresses the following questions:
 1. “Is an automatic or manual transmission better for MPG”
